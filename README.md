@@ -29,3 +29,8 @@ Before you start, ensure you have the following installed on your machine:
    The necessary Python libraries are in the requirements.txt file:
    ```bash
    pip install -r requirements.txt
+
+## Running the Project
+
+### Data Preparation
+   I created an exmaple CSV file with transaction data in the data directory. That file is necessary for the scripts to run.

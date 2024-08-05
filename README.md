@@ -8,6 +8,11 @@ Welcome to the Automatic Write-Off Detection project! This project is inspired b
 2. Categorize transactions into various categories like Purchase, Debit, Payment, etc.
 3. Detect and handle duplicate transactions
 
+## Features
+- **Merchant Identification**: Uses Regex and string processing techniques to identify merchants from transaction descriptions
+- **Transaction Categorization**: Classifies transactions using a machine learning model
+- **Duplicate Handling**: Detects and handles duplicate transactions
+
 ## Setup
 
 ### Prerequisites

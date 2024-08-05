@@ -34,3 +34,11 @@ Before you start, ensure you have the following installed on your machine:
 
 ### Data Preparation
    I created an example CSV file with transaction data in the data directory. That file is necessary for the scripts to run.
+   
+### Executing the Main Script
+   To run the main part of the project which processes the data, simply execute the main.py script:
+   ```bash
+      python src/main.py 
+   ```
+## Data and Model Notebooks
+- data_exploration.ipynb: Explore and understand transaction data

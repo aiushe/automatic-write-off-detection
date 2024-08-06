@@ -5,10 +5,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
+import openai
 import re
 from fuzzywuzzy import fuzz, process
-from transformers import pipeline as transformers_pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import joblib
+
+openai.api_key = 'sk-riIjD2s4UXSBF4Jsxf1B9CjvF7OyggxWBrG5qNXZxQT3BlbkFJJ23V_f_lspEvQlyTWkcrWtF-hZ9p8PM-GaNq3DBcEA'
 
 def identify_merchant(transaction):
     def extract_entities(transaction):
@@ -48,24 +50,18 @@ def identify_merchant(transaction, sample):
     else:
         'UNKNOWN'
 
-def categorize_transaction(transaction, vectorizer, model):
-    new_info_data = vectorizer.transform([transaction])
-    return model.predict(new_info_data)[0]
+def gpt_feature_extraction(transaction):
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=f"Extract meaningful features from this transaction description: {transaction}",
+        max_tokens=50
+    )
+    return response.choices[0].text.strip()
 
-def find_duplicate(transaction1, transaction2, vectorizer, model):
-    new_info_data = vectorizer.transform([transaction1, transaction2])
-    return model.predict(new_info_data)
-
-#implement transformer for ChatGPT4
-
-def gpt_feature_extraction(transaction, nlp_pipline):
-    features = nlp_pipline(transaction)
-    return features[0][0]
-
-def preprocess_data(df, vectorizer, nlp_pipline):
+def preprocess_data(df, vectorizer):
     df['merchant'] = df['transaction_info'].apply(lambda x: prioritize(extract_entities(x)))
-    df['gpt_features'] = df['transaction_info'].apply(lambda x: gpt_feature_extraction(x, nlp_pipeline))
-    X = list(df['gpt_features'])
+    df['gpt_features'] = df['transaction_info'].apply(gpt_feature_extraction)
+    X = vectorizer.fit_transform(df['gpt_features'])
     y = df['category']
     return X, y
 

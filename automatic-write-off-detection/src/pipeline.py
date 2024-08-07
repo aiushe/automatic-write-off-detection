@@ -38,7 +38,7 @@ def gpt_feature_extraction(transaction):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "xxtract features from this transaction description."},
+            {"role": "system", "content": "extract features from this transaction description."},
             {"role": "user", "content": transaction}
         ]
     )

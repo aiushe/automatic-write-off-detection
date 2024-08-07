@@ -5,8 +5,8 @@ from sklearn.model_selection import train_test_split
 import joblib
 
 #load models
-vectorizer = joblib.load('../models/vectorizer_expanded.pkl')
-model = joblib.load('../models/transaction_classifier_expanded.pkl')
+vectorizer = joblib.load('../models/vectorizer.pkl')
+model = joblib.load('../models/transaction_classifier.pkl')
 
 def categorize_transaction(transactions):
     new_info_data = vectorizer.transform([transactions])

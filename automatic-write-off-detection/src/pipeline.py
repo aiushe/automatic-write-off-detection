@@ -5,8 +5,6 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 import openai
-import re
-from fuzzywuzzy import fuzz, process
 import joblib
 
 from categorization import categorize_transaction
@@ -50,14 +48,22 @@ def transform(df, vectorizer):
     :return: Tuple containing the feature matrix (X) and target vector (y)
     '''
     df['plaid_merchant_description'] = df['plaid_merchant_description'].fillna('')
+
     df['entities'] = df['plaid_merchant_description'].apply(lambda x: extract_entities(x))
-
-    df['gpt_features'] = df['plaid_merchant_description'].apply(gpt_feature_extraction)
-
     df['merchant'] = df['entities'].apply(lambda x: prioritize(x)).fillna('')
+
     df['transaction_type'] = df['entities'].apply(lambda x: x['transaction_type']).fillna('')
     df['amount'] = df['entities'].apply(lambda x: x['amount']).fillna('')
     df['plaid_category'] = df['entities'].apply(lambda x: x['plaid_category']).fillna('')
+
+    df['gpt_features'] = df['plaid_merchant_description'].apply(gpt_feature_extraction)
+
+    df['category'] = df['plaid_merchant_description'].apply(categorize_transaction)
+
+    # find duplicates and remove
+    df['is_duplicate'] = df.apply(
+        lambda row: find_duplicate(row['plaid_merchant_description'], row['keeper_merchant_description']), axis=1)
+    df = df[df['is_duplicate'] == 0]
 
     X = vectorizer.fit_transform(
         df['plaid_merchant_description'] + ' ' + df['gpt_features'] + ' ' + df['merchant'] + ' ' + df[
@@ -134,7 +140,7 @@ def main():
     model = train_model(X, y, model_type='naive_bayes')
 
     #load (save) model and vectorizer
-    load(model, vectorizer, '../models/transaction_classifier_expanded.pkl', '../models/vectorizer_expanded.pkl')
+    load(model, vectorizer, '../models/transaction_classifier.pkl', '../models/vectorizer.pkl')
 
 if __name__ == "__main__":
     main()

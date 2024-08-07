@@ -5,8 +5,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import joblib
 
 #load models
-vectorizer = joblib.load('../models/vectorizer_expanded.pkl')
-model = joblib.load('../models/transaction_classifier_expanded.pkl')
+vectorizer = joblib.load('../models/vectorizer.pkl')
+model = joblib.load('../models/transaction_classifier.pkl')
 
 
 def find_duplicate(transaction1, transaction2):

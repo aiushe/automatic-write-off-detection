@@ -10,8 +10,7 @@ import re
 from fuzzywuzzy import fuzz, process
 import joblib
 
-openai.api_key = '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'
-
+openai.api_key = 'your_openai_api_key'
 def extract_entities(transaction):
     # disect transaction data following the pattern (MetaData, Bank, App) and ignore the rest
     pattern = {
@@ -50,7 +49,7 @@ def identify_merchant(transaction, sample):
 
 def gpt_feature_extraction(transaction):
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": "xxtract features from this transaction description."},
             {"role": "user", "content": transaction}
@@ -59,8 +58,9 @@ def gpt_feature_extraction(transaction):
     return response['choices'][0]['message']['content']
 
 def preprocess_data(df, vectorizer):
-    df['gpt_features'] = df['plaid_merchant_description'].apply(gpt_feature_extraction)
-    df['merchant'] = df['plaid_merchant_description'].apply(lambda x: prioritize(extract_entities(x)))
+    df['plaid_merchant_description'] = df['plaid_merchant_description'].fillna('')
+    df['gpt_features'] = df['plaid_merchant_description'].apply(gpt_feature_extraction).fillna('')
+    df['merchant'] = df['plaid_merchant_description'].apply(lambda x: prioritize(extract_entities(x))).fillna('')
     X = vectorizer.fit_transform(df['plaid_merchant_description'] + ' ' + df['gpt_features'] + ' ' + df['merchant'])
 
     #categories
@@ -89,7 +89,7 @@ def train_model(X, y, model_type='naive_bayes'):
 
 def main():
     df = pd.read_csv('../data/expanded_transactions.csv')
-    print("columns:", df.columns)
+    #print("columns:", df.columns)
     vectorizer = TfidfVectorizer()
     X, y = preprocess_data(df, vectorizer)
 

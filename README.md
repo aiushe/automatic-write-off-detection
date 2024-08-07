@@ -36,6 +36,7 @@ Before you start, ensure you have the following installed on your machine:
    pip install -r requirements.txt
 
 ## Running the Project
+- set your OpenAI API key in the code: openai.api_key = 'your_openai_api_key' (replace 'your_openai_api_key' with your actual API key) in pipeline.py
 
 ### Data Preparation
    I created an example CSV file with transaction data in the data directory. That file is necessary for the scripts to run.
@@ -47,14 +48,14 @@ Before you start, ensure you have the following installed on your machine:
    ```
 ## Data and Model Notebooks
 - data_exploration.ipynb: Explore and understand transaction data
-Pipeline and Model Training
+pipeline and model training
 
 ## Pipeline and Model Training
 ### Preprocess Data
 - preprocess_data function in pipeline.py cleans and prepares the data for model training
 
 ### Train the Model
-- model training and pipeline setup are managed within pipeline.py, which trains a Naive Bayes or Linear Regression model (whichever is specified) and integrates a GPT-3/ChatGPT model to enhance extraction
+- model training and pipeline setup are managed within pipeline.py, which trains a Naive Bayes or Linear Regression model (whichever is specified) and integrates a GPT-4/ChatGPT model to enhance extraction
 
 ### Evaluate the Model
 - model is evaluated for accuracy, precision, recall, and other metrics and  results are printed and saved in the models directory

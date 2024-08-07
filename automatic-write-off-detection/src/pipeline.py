@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 import openai
 import re
 from fuzzywuzzy import fuzz, process
@@ -81,7 +81,11 @@ def train_model(X, y, model_type='naive_bayes'):
 
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    print(classification_report(y_test, y_pred))
+
+    #classification report
+    print(classification_report(y_test, y_pred, zero_division=1))
+    print(confusion_matrix(y_test, y_pred))
+
     return model
 
 

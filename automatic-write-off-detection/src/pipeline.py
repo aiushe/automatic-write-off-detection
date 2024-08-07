@@ -10,8 +10,6 @@ import re
 from fuzzywuzzy import fuzz, process
 import joblib
 
-
-
 def extract_entities(transaction):
     pattern = {
         'transaction_type': r'(PURCHASE|DEBIT|POS|PRE-AUTHORIZATION|ATM WITHDRAWAL|TRANSFER)',

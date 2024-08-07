@@ -10,42 +10,45 @@ import re
 from fuzzywuzzy import fuzz, process
 import joblib
 
+openai.api_key = 'sk-wgg_zkObkp1mRGiNSZElMGgNb1NRrw40MrCcxPIlm2T3BlbkFJp4a8SpEkt6WCHTQdzcozBqHTmzCS8ipPJcieHMnoQA'
+
 
 def extract_entities(transaction):
-    # disect transaction data following the pattern (MetaData, Bank, App) and ignore the rest
     pattern = {
-        'metadata': r'(DEBIT WITHDRAWAL|PURCHASE|PRE-AUTHORIZATION DEBIT|POS DEBIT)',
-        'bank': r'(WELLS FARGO|BANK OF AMERICA|CHASE|CITI|BP)',
-        'app': r'(UBER|LYFT|PAYPAL|AFFIRM|APPLE)'
+        'transaction_type': r'(PURCHASE|DEBIT|POS|PRE-AUTHORIZATION|ATM WITHDRAWAL|TRANSFER)',
+        'merchant': r'([A-Z][A-Za-z\s\d]*[A-Za-z])',  #mixed case and spaces/digits in merchant name
+        'amount': r'[-]?\$\d+,\d+\.\d{2}',  #amounts like $1,960.00 or -$1,960.00
+        'plaid_category': r"\['[^]]+'\]",  #category in brackets
     }
 
-    entities = {'metadata': None, 'bank': None, 'app': None}
+    entities = {'transaction_type': None, 'merchant': None, 'amount': None, 'plaid_category': None}
 
-    # loop throught the string to find and determine the important info defined in the pattern above
+    #loop throught the string to find and determine the important info defined in the pattern above
     for key, p in pattern.items():
         match = re.search(p, transaction, re.IGNORECASE)
         if match:
             entities[key] = match.group(0)
     return entities
 
+
 def prioritize(entities):
-    if entities['app']:
-        return entities['app']
-    elif entities['bank']:
-        return entities['bank']
+    if entities['merchant']:
+        return entities['merchant']
+    elif entities['transaction_type']:
+        return entities['transaction_type']
     else:
-        if entities['metadata']:
-            return entities['metadata']
-        else:
             'UNKNOWN'
 
+
 def identify_merchant(transaction, sample):
-    #use fuzz to determine score threshold(if the best match is found, but it is not greater than this number, then return None otherwise default 0)
+    # use fuzz to determine score threshold(if the best match is found, but it is not greater than this number,
+    # then return None otherwise default 0)
     match = process.extractOne(transaction, sample, scorer=fuzz.token_sort_ratio)
     if match:
         return match[0]
     else:
         return 'UNKNOWN'
+
 
 def gpt_feature_extraction(transaction):
     response = openai.ChatCompletion.create(
@@ -57,18 +60,25 @@ def gpt_feature_extraction(transaction):
     )
     return response['choices'][0]['message']['content']
 
+
 def preprocess_data(df, vectorizer):
     df['plaid_merchant_description'] = df['plaid_merchant_description'].fillna('')
-    df['gpt_features'] = df['plaid_merchant_description'].apply(gpt_feature_extraction).fillna('')
-    df['merchant'] = df['plaid_merchant_description'].apply(lambda x: prioritize(extract_entities(x))).fillna('')
-    X = vectorizer.fit_transform(df['plaid_merchant_description'] + ' ' + df['gpt_features'] + ' ' + df['merchant'])
+    df['entities'] = df['plaid_merchant_description'].apply(lambda x: extract_entities(x))
 
-    #categories
-    #unique_categories = df['category'].unique()
-    #print(f"Unique Categories: {unique_categories}")
+    df['gpt_features'] = df['plaid_merchant_description'].apply(gpt_feature_extraction)
 
+    df['merchant'] = df['entities'].apply(lambda x: prioritize(x)).fillna('')
+    df['transaction_type'] = df['entities'].apply(lambda x: x['transaction_type']).fillna('')
+    df['amount'] = df['entities'].apply(lambda x: x['amount']).fillna('')
+    df['plaid_category'] = df['entities'].apply(lambda x: x['plaid_category']).fillna('')
+
+    X = vectorizer.fit_transform(
+        df['plaid_merchant_description'] + ' ' + df['gpt_features'] + ' ' + df['merchant'] + ' ' + df[
+            'transaction_type'] + ' ' + df['amount'] + ' ' + df['plaid_category'])
     y = df['keeper_category'].fillna('')
+
     return X, y
+
 
 def train_model(X, y, model_type='naive_bayes'):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -82,10 +92,12 @@ def train_model(X, y, model_type='naive_bayes'):
     y_pred = model.predict(X_test)
 
     #classification report
-    print(classification_report(y_test, y_pred, zero_division=1))
+    display_classification_report(y_test, y_pred)
     print(confusion_matrix(y_test, y_pred))
 
     return model
+
+
 def display_classification_report(y_test, y_pred):
     report_dict = classification_report(y_test, y_pred, output_dict=True, zero_division=1)
 
@@ -97,11 +109,11 @@ def display_classification_report(y_test, y_pred):
 
 
 def main():
-    df = pd.read_csv('../data/data_test_1.csv')
+    df = pd.read_csv('../data/mini_transactions.csv')
     #print("columns:", df.columns)
     vectorizer = TfidfVectorizer()
     X, y = preprocess_data(df, vectorizer)
-
+    '''
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     model = MultinomialNB()
@@ -111,9 +123,11 @@ def main():
 
     #classification_report
     display_classification_report(y_test, y_pred)
+    '''
+    model = train_model(X,y, model_type= 'naive_bayes')
 
-    joblib.dump(model, '../models/transaction_classifier_keeper_data.pkl')
-    joblib.dump(vectorizer, '../models/vectorizer_keeper_data.pkl')
+    joblib.dump(model, '../models/transaction_classifier_mini.pkl')
+    joblib.dump(vectorizer, '../models/vectorizer_mini.pkl')
 
 
 if __name__ == "__main__":

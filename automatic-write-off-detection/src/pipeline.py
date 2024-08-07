@@ -10,7 +10,7 @@ import re
 from fuzzywuzzy import fuzz, process
 import joblib
 
-openai.api_key = 'your_openai_api_key'
+
 def extract_entities(transaction):
     # disect transaction data following the pattern (MetaData, Bank, App) and ignore the rest
     pattern = {
@@ -86,9 +86,18 @@ def train_model(X, y, model_type='naive_bayes'):
     print(confusion_matrix(y_test, y_pred))
 
     return model
+def display_classification_report(y_test, y_pred):
+    report_dict = classification_report(y_test, y_pred, output_dict=True, zero_division=1)
+
+    #convert to dataframe for easier readability
+    report_df = pd.DataFrame(report_dict).transpose()
+
+    print("\nclassification report:")
+    print(report_df)
+
 
 def main():
-    df = pd.read_csv('../data/expanded_transactions.csv')
+    df = pd.read_csv('../data/data_test_1.csv')
     #print("columns:", df.columns)
     vectorizer = TfidfVectorizer()
     X, y = preprocess_data(df, vectorizer)
@@ -99,11 +108,12 @@ def main():
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
-    #classification_report
-    print(classification_report(y_test, y_pred))
 
-    joblib.dump(model, '../models/transaction_classifier.pkl')
-    joblib.dump(vectorizer, '../models/vectorizer.pkl')
+    #classification_report
+    display_classification_report(y_test, y_pred)
+
+    joblib.dump(model, '../models/transaction_classifier_keeper_data.pkl')
+    joblib.dump(vectorizer, '../models/vectorizer_keeper_data.pkl')
 
 
 if __name__ == "__main__":

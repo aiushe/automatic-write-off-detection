@@ -69,3 +69,9 @@ date,plaid_merchant_description,amount,plaid_category,write_off_status (basic ru
 2022-01-03,MOBILE PURCHASE 01/03 MARATHON PETRO11,73.52,"Travel, Gas Stations",no,no,Marathon,⛽ gas fill up,no,no
 2022-01-03,PGANDE DES:WEB ONLINE ID:XXXXXXXXXX8324 INDN:JOHNNY CO ID:XXXXX11632 WEB,90.15,Utilities,no,yes,PG&E,🏠 utilities,yes,yes
 2022-01-04,PMNT SENT 0104 APPLE CASH - SENT CA XXXXX3630XXXXXXXXXX8324,744.20,"Payment, Credit Card",no,no,Apple Card Payment,↔️ transfer,no,no
+```
+### Explanation of Output Metrics:
+- precision: ratio of correctly predicted positive observations to the total predicted positives
+- recall: ratio of correctly predicted positive observations to the all observations in class
+- f1-score: weighted average of precision and rrecall
+- support: number of actual occurrences of class in the specified datase

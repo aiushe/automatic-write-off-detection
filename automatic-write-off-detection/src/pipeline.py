@@ -10,7 +10,6 @@ import re
 from fuzzywuzzy import fuzz, process
 import joblib
 
-openai.api_key = 'sk-wgg_zkObkp1mRGiNSZElMGgNb1NRrw40MrCcxPIlm2T3BlbkFJp4a8SpEkt6WCHTQdzcozBqHTmzCS8ipPJcieHMnoQA'
 
 
 def extract_entities(transaction):

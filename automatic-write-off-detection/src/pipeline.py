@@ -62,7 +62,11 @@ def preprocess_data(df, vectorizer):
     df['merchant'] = df['transaction_info'].apply(lambda x: prioritize(extract_entities(x)))
     df['gpt_features'] = df['transaction_info'].apply(gpt_feature_extraction)
     X = vectorizer.fit_transform(df['gpt_features'])
-    #print("columns:", df.columns)
+
+    #categories
+    unique_categories = df['category'].unique()
+    print(f"Unique Categories: {unique_categories}")
+
     y = df['category']
     return X, y
 
@@ -82,7 +86,7 @@ def train_model(X, y, model_type='naive_bayes'):
 
 
 def main():
-    df = pd.read_csv('../data/transactions.csv')
+    df = pd.read_csv('../data/expanded_transactions.csv')
     vectorizer = TfidfVectorizer()
 
     X, y = preprocess_data(df, vectorizer)

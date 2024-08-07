@@ -10,7 +10,7 @@ import re
 from fuzzywuzzy import fuzz, process
 import joblib
 
-openai.api_key = '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'
+openai.api_key = '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'
 
 def extract_entities(transaction):
     # disect transaction data following the pattern (MetaData, Bank, App) and ignore the rest
@@ -52,24 +52,23 @@ def gpt_feature_extraction(transaction):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "Extract meaningful features from this transaction description."},
+            {"role": "system", "content": "xxtract features from this transaction description."},
             {"role": "user", "content": transaction}
         ]
     )
-    return response.choices[0].message['content'].strip()
+    return response['choices'][0]['message']['content']
 
 def preprocess_data(df, vectorizer):
-    df['merchant'] = df['transaction_info'].apply(lambda x: prioritize(extract_entities(x)))
-    df['gpt_features'] = df['transaction_info'].apply(gpt_feature_extraction)
-    X = vectorizer.fit_transform(df['gpt_features'])
+    df['gpt_features'] = df['plaid_merchant_description'].apply(gpt_feature_extraction)
+    df['merchant'] = df['plaid_merchant_description'].apply(lambda x: prioritize(extract_entities(x)))
+    X = vectorizer.fit_transform(df['plaid_merchant_description'] + ' ' + df['gpt_features'] + ' ' + df['merchant'])
 
     #categories
-    unique_categories = df['category'].unique()
-    print(f"Unique Categories: {unique_categories}")
+    #unique_categories = df['category'].unique()
+    #print(f"Unique Categories: {unique_categories}")
 
-    y = df['category']
+    y = df['keeper_category'].fillna('')
     return X, y
-
 
 def train_model(X, y, model_type='naive_bayes'):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -88,13 +87,20 @@ def train_model(X, y, model_type='naive_bayes'):
 
     return model
 
-
 def main():
     df = pd.read_csv('../data/expanded_transactions.csv')
+    print("columns:", df.columns)
     vectorizer = TfidfVectorizer()
-
     X, y = preprocess_data(df, vectorizer)
-    model = train_model(X, y, model_type='naive_bayes')
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model = MultinomialNB()
+    model.fit(X_train, y_train)
+
+    y_pred = model.predict(X_test)
+    #classification_report
+    print(classification_report(y_test, y_pred))
 
     joblib.dump(model, '../models/transaction_classifier.pkl')
     joblib.dump(vectorizer, '../models/vectorizer.pkl')

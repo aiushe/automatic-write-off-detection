@@ -1,0 +1,5 @@
+data_path: "../data/expanded_transactions.csv"
+model_path: "../models/transaction_classifier.pkl"
+vectorizer_path: "../models/vectorizer.pkl"
+test_size: 0.2
+random_state: 42

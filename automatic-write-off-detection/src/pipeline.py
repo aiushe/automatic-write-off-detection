@@ -7,11 +7,16 @@ from sklearn.metrics import classification_report, confusion_matrix
 import openai
 import joblib
 
+import yaml
+from utils import load_env_vars
+from logger import logger
+
 from categorization import categorize_transaction
 from duplicate_handling import find_duplicate
 from merchant_identification import extract_entities, prioritize, identify_merchant
 
-openai.api_key = 'Replace with Key'
+openai_api_key = load_env_vars()
+openai.api_key = openai_api_key
 
 def extract(file_path):
     '''
@@ -20,6 +25,7 @@ def extract(file_path):
     :param file_path: Path to the CSV file
     :return: DataFrame with extracted data
     '''
+    logger.info(f"Extracting data from {file_path}")
     return pd.read_csv(file_path)
 
 def gpt_feature_extraction(transaction):
@@ -47,6 +53,7 @@ def transform(df, vectorizer):
     :param vectorizer: TF-IDF vectorizer
     :return: Tuple containing the feature matrix (X) and target vector (y)
     '''
+    logger.info("Transforming data")
     df['plaid_merchant_description'] = df['plaid_merchant_description'].fillna('')
 
     df['entities'] = df['plaid_merchant_description'].apply(lambda x: extract_entities(x))
@@ -82,6 +89,7 @@ def train_model(X, y, model_type='naive_bayes'):
     :param model_type: Type of model to train ('naive_bayes' or 'linear_regression')
     :return: Trained model
     '''
+    logger.info(f"Training model: {model_type}")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     if model_type == 'naive_bayes':
@@ -94,7 +102,8 @@ def train_model(X, y, model_type='naive_bayes'):
 
     #classification report
     display_classification_report(y_test, y_pred)
-    print(confusion_matrix(y_test, y_pred))
+    logger.info("Confusion Matrix:")
+    logger.info(confusion_matrix(y_test, y_pred))
 
     return model
 
@@ -109,7 +118,7 @@ def display_classification_report(y_test, y_pred):
     report_dict = classification_report(y_test, y_pred, output_dict=True, zero_division=1)
     report_df = pd.DataFrame(report_dict).transpose()
 
-    print("\nclassification report:")
+    logger.info("\nClassification Report:")
     print(report_df)
 
 
@@ -122,6 +131,7 @@ def load(model, vectorizer, model_path, vectorizer_path):
     :param model_path: File path to save the model
     :param vectorizer_path: File path to save the vectorizer
     '''
+    logger.info(f"Saving model to {model_path} and vectorizer to {vectorizer_path}")
     joblib.dump(model, model_path)
     joblib.dump(vectorizer, vectorizer_path)
 
@@ -129,8 +139,12 @@ def main():
     '''
     Main function that extract data, transform, trains model, and save model
     '''
+    #load
+    with open("../config.yaml", 'r') as config_file:
+        config = yaml.safe_load(config_file)
+
     #extract
-    df = extract('../data/expanded_transactions.csv')
+    df = extract(config['data_path'])
 
     #transform
     vectorizer = TfidfVectorizer()
@@ -140,7 +154,7 @@ def main():
     model = train_model(X, y, model_type='naive_bayes')
 
     #load (save) model and vectorizer
-    load(model, vectorizer, '../models/transaction_classifier.pkl', '../models/vectorizer.pkl')
+    load(model, vectorizer, config['model_path'], config['vectorizer_path'])
 
 if __name__ == "__main__":
     main()

@@ -3,13 +3,20 @@ from categorization import categorize_transaction
 from duplicate_handling import find_duplicate
 import pandas as pd
 import joblib
+import openai
+from utils import load_env_vars
+from logger import logger
 
-#load data
-df = pd.read_csv('../data/expanded_transactions.csv')
+openai_api_key = load_env_vars()
+openai.api_key = openai_api_key
+
 
 #load vectorizer and model
 vectorizer = joblib.load('../models/vectorizer.pkl')
 model = joblib.load('../models/transaction_classifier.pkl')
+
+#load data
+df = pd.read_csv('../data/expanded_transactions.csv')
 
 #identify merchants
 df['entities'] = df['plaid_merchant_description'].apply(extract_entities)
@@ -30,6 +37,7 @@ for t in df['plaid_merchant_description']:
         if usual:
             find_unusual_transactions.append(t)
 
-print(df[['plaid_merchant_description', 'merchant', 'category']])
-print("unique transactions:")
-print(find_unusual_transactions)
+logger.info("Processed transactions:")
+logger.info(df[['plaid_merchant_description', 'merchant', 'category']])
+logger.info("Unique transactions:")
+logger.info(find_unusual_transactions)

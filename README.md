@@ -47,3 +47,24 @@ Before you start, ensure you have the following installed on your machine:
    ```
 ## Data and Model Notebooks
 - data_exploration.ipynb: Explore and understand transaction data
+Pipeline and Model Training
+
+## Pipeline and Model Training
+### Preprocess Data
+- preprocess_data function in pipeline.py cleans and prepares the data for model training
+
+### Train the Model
+- model training and pipeline setup are managed within pipeline.py, which trains a Naive Bayes or Linear Regression model (whichever is specified) and integrates a GPT-3/ChatGPT model to enhance extraction
+
+### Evaluate the Model
+- model is evaluated for accuracy, precision, recall, and other metrics and  results are printed and saved in the models directory
+
+### Expanded Data Example
+- This data was created from Keeper Tax's transaction data for a fictitious Chicago-based freelance graphic designer
+```bash
+date,plaid_merchant_description,amount,plaid_category,write_off_status (basic rules),ground_truth,keeper_merchant_description,keeper_category,write_off_status (keeper first pass),write_off_status (keeper after 1st session)
+2022-01-02,Zelle Transfer Conf# nvizxvsui4; Tim,-1960.00,"Transfer, Credit",no,no,Zelle Transfer - Tim,↔️ transfer,no,no
+2022-01-02,TRELLO.COM* ATLASSIAN XXXXXXXXXXXX0497,14.99,"Shops, Digital Purchase",needs review,yes,Trello,💻 software,yes,yes
+2022-01-03,MOBILE PURCHASE 01/03 MARATHON PETRO11,73.52,"Travel, Gas Stations",no,no,Marathon,⛽ gas fill up,no,no
+2022-01-03,PGANDE DES:WEB ONLINE ID:XXXXXXXXXX8324 INDN:JOHNNY CO ID:XXXXX11632 WEB,90.15,Utilities,no,yes,PG&E,🏠 utilities,yes,yes
+2022-01-04,PMNT SENT 0104 APPLE CASH - SENT CA XXXXX3630XXXXXXXXXX8324,744.20,"Payment, Credit Card",no,no,Apple Card Payment,↔️ transfer,no,no

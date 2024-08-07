@@ -3,16 +3,22 @@ from fuzzywuzzy import fuzz, process
 
 
 def extract_entities(transaction):
-    #disect transaction data following the pattern (MetaData, Bank, App) and ignore the rest
+    '''
+    Extract entities from a transaction description using regular expressions
+
+    :param transaction: Transaction description
+    :return: Dictionary that contains the extracted entities
+    '''
     pattern = {
-        'metadata': r'(DEBIT WITHDRAWAL|PURCHASE|PRE-AUTHORIZATION DEBIT|POS DEBIT)',
-        'bank': r'(WELLS FARGO|BANK OF AMERICA|CHASE|CITI|BP)',
-        'app': r'(UBER|LYFT|PAYPAL|AFFIRM|APPLE)'
+        'transaction_type': r'(PURCHASE|DEBIT|POS|PRE-AUTHORIZATION|ATM WITHDRAWAL|TRANSFER)',
+        'merchant': r'([A-Z][A-Za-z\s\d]*[A-Za-z])',  #mixed case and spaces/digits in merchant name
+        'amount': r'[-]?\$\d+,\d+\.\d{2}',  #amounts like $1,960.00 or -$1,960.00
+        'plaid_category': r"\['[^]]+'\]",  #category in brackets
     }
 
-    entities = {'metadata': None, 'bank': None, 'app': None}
+    entities = {'transaction_type': None, 'merchant': None, 'amount': None, 'plaid_category': None}
 
-    #loop throught the string to find and determine the important info defined in the pattern above
+    #loop through pattern and extract entities from transaction description
     for key, p in pattern.items():
         match = re.search(p, transaction, re.IGNORECASE)
         if match:
@@ -21,26 +27,35 @@ def extract_entities(transaction):
 
 
 def prioritize(entities):
-    if entities['app']:
-        return entities['app']
-    elif entities['bank']:
-        return entities['bank']
+    '''
+    Prioritize and return the most relevant information from the extracted entities
+
+    :param entities: Dictionary that contains the extracted entities
+    :return: Prioritized entity or 'UNKNOWN'
+    '''
+    if entities['merchant']:
+        return entities['merchant']
+    elif entities['transaction_type']:
+        return entities['transaction_type']
     else:
-        if entities['metadata']:
-            return entities['metadata']
-        else:
-            'UNKNOWN'
+        return 'UNKNOWN'
 
 
 def identify_merchant(transaction, sample):
-    #use fuzz to determine score threshold(if the best match is found, but it is not greater than this number, then return None otherwise default 0)
+    '''
+    Identify the merchant from transaction description using fuzzy matching
+
+    :param transaction: Transaction description
+    :param sample: List of sample merchants
+    :return: Identified merchant or 'UNKNOWN'
+    '''
+
     match = process.extractOne(transaction, sample, scorer=fuzz.token_sort_ratio)
     if match:
         return match[0]
     else:
-        'UNKNOWN'
+        return 'UNKNOWN'
 
-#test
 if __name__ == "__main__":
     sample_t = [
         'PURCHASE BP#8773269DE MOUNT JULIET TN CARDXXXX',
@@ -61,9 +76,3 @@ if __name__ == "__main__":
         print(f"Entities: {entities}")
         print(f"Merchant: {merchant}")
         print("-" * 40)
-        '''
-        output
-            Transaction: PURCHASE BP#8773269DE MOUNT JULIET TN CARDXXXX
-            Entities: {'metadata': 'PURCHASE', 'bank': 'CHASE', 'app': None}
-            Merchant: PURCHASE BP#8773269DE MOUNT JULIET TN CARDXXXX
-        '''

@@ -9,6 +9,10 @@ import re
 from fuzzywuzzy import fuzz, process
 import joblib
 
+from categorization import categorize_transaction
+from duplicate_handling import find_duplicate
+from merchant_identification import extract_entities, prioritize, identify_merchant
+
 openai.api_key = 'Replace with Key'
 
 def extract(file_path):
@@ -19,60 +23,6 @@ def extract(file_path):
     :return: DataFrame with extracted data
     '''
     return pd.read_csv(file_path)
-def extract_entities(transaction):
-    '''
-    Extract entities from a transaction description using regular expressions
-
-    :param transaction: Transaction description
-    :return: Dictionary that contains the extracted entities
-    '''
-    pattern = {
-        'transaction_type': r'(PURCHASE|DEBIT|POS|PRE-AUTHORIZATION|ATM WITHDRAWAL|TRANSFER)',
-        'merchant': r'([A-Z][A-Za-z\s\d]*[A-Za-z])',  #mixed case and spaces/digits in merchant name
-        'amount': r'[-]?\$\d+,\d+\.\d{2}',  #amounts like $1,960.00 or -$1,960.00
-        'plaid_category': r"\['[^]]+'\]",  #category in brackets
-    }
-
-    entities = {'transaction_type': None, 'merchant': None, 'amount': None, 'plaid_category': None}
-
-    #loop through pattern and extract entities from transaction description
-    for key, p in pattern.items():
-        match = re.search(p, transaction, re.IGNORECASE)
-        if match:
-            entities[key] = match.group(0)
-    return entities
-
-
-def prioritize(entities):
-    '''
-    Prioritize and return the most relevant information from the extracted entities
-
-    :param entities: Dictionary that contains the extracted entities
-    :return: Prioritized entity or 'UNKNOWN'
-    '''
-    if entities['merchant']:
-        return entities['merchant']
-    elif entities['transaction_type']:
-        return entities['transaction_type']
-    else:
-        return 'UNKNOWN'
-
-
-def identify_merchant(transaction, sample):
-    '''
-    Identify the merchant from transaction description using fuzzy matching
-
-    :param transaction: Transaction description
-    :param sample: List of sample merchants
-    :return: Identified merchant or 'UNKNOWN'
-    '''
-
-    match = process.extractOne(transaction, sample, scorer=fuzz.token_sort_ratio)
-    if match:
-        return match[0]
-    else:
-        return 'UNKNOWN'
-
 
 def gpt_feature_extraction(transaction):
     '''

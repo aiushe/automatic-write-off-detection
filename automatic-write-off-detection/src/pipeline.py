@@ -9,6 +9,8 @@ import re
 from fuzzywuzzy import fuzz, process
 import joblib
 
+openai.api_key = 'Replace with Key'
+
 def extract(file_path):
     '''
     Extract data from a CSV file

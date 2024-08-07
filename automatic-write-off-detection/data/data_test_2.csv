@@ -1,0 +1,6 @@
+date,plaid_merchant_description,amount,plaid_category,write_off_status (basic rules),ground_truth,keeper_merchant_description,keeper_category,write_off_status (keeper first pass),write_off_status (keeper after 1st session)
+2022-02-01,Zelle Transfer Conf# nvizxvsui4; Tim,-1960.00,"['Transfer', 'Credit']",no,no,Zelle Transfer - Tim,↔️ transfer,no,no
+2022-02-02,DENNY'S #1 POSPUR 548109 253 MAIN STREET 0047 CHICAGO IL 66110 034700,26.98,"['Food and Drink', 'Restaurants']",needs review,no,Denny's,🍽️ business meal,needs review,no
+2022-02-03,RECURRING DEBIT CARD XXXXX2069 TMOBILEAUTO PAY XXXXX8324,75.99,"['Service', 'Telecommunication Services']",yes,yes,T-Mobile,📶 phone bill,yes,yes
+2022-02-04,ACH WEB IXBB54OYT ADOBE PHOTOSH,24.50,"['Shops', 'Digital Purchase']",needs review,yes,Adobe Photoshop,💻 software,yes,yes
+2022-02-05,PLAYSTATION NETWORK XXXXX7669,16.99,"['Shops', 'Digital Purchase']",needs review,no,Playstation Network,📺 entertainment,no,no

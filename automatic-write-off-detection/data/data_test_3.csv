@@ -1,0 +1,6 @@
+date,plaid_merchant_description,amount,plaid_category,write_off_status (basic rules),ground_truth,keeper_merchant_description,keeper_category,write_off_status (keeper first pass),write_off_status (keeper after 1st session)
+2022-03-01,Zelle Transfer Conf# 2tagioiiphw; Tim,-2175.00,"['Transfer', 'Credit']",no,no,Zelle Transfer - Tim,↔️ transfer,no,no
+2022-03-02,MONTHLY MAINTENANCE FEE,12.00,"['Bank Fees']",yes,no,Monthly Maintenance Fee,🏦 bank fee,no,no
+2022-03-03,ATM WITHDRAWAL 01/13 #XXXXX0008324 WITHDRWL 3RD AND MAIN,100.00,"['Bank Fees']",no,no,ATM Withdrawal,↔️ transfer,no,no
+2022-03-04,DD DOORDASH MARCOSPIZ,19.25,"['Food and Drink', 'Restaurants']",needs review,no,Doordash - Marco's Pizza,🍽️ business meal,no,no
+2022-03-05,DOS TOROS MEXICAN GRI CHICAGO IL WITHDRWL XX2525,18.99,"['Food and Drink', 'Restaurants']",needs review,yes,Dos Toros,🍽️ business meal,needs review,yes

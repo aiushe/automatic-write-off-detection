@@ -12,7 +12,6 @@ from utils import load_env_vars
 from logger import logger
 
 from categorization import categorize_transaction
-from duplicate_handling import find_duplicate
 from merchant_identification import extract_entities, prioritize, identify_merchant
 
 openai_api_key = load_env_vars()
@@ -68,9 +67,7 @@ def transform(df, vectorizer):
     df['category'] = df['plaid_merchant_description'].apply(categorize_transaction)
 
     # find duplicates and remove
-    df['is_duplicate'] = df.apply(
-        lambda row: find_duplicate(row['plaid_merchant_description'], row['keeper_merchant_description']), axis=1)
-    df = df[df['is_duplicate'] == 0]
+    df = df.drop_duplicates(subset=['plaid_merchant_description', 'keeper_merchant_description'])
 
     X = vectorizer.fit_transform(
         df['plaid_merchant_description'] + ' ' + df['gpt_features'] + ' ' + df['merchant'] + ' ' + df[

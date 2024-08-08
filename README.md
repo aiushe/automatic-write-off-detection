@@ -36,7 +36,7 @@ Before you start, ensure you have the following installed on your machine:
    pip install -r requirements.txt
 
 ## Running the Project
-- set your OpenAI API key in the code: openai.api_key = 'your_openai_api_key' (replace 'your_openai_api_key' with your actual API key) in pipeline.py
+- set your OpenAI API key in the code: openai.api_key = 'your_openai_api_key' (replace 'your_openai_api_key' with your actual API key) in .env
 
 ### Data Preparation
    I created an example CSV file with transaction data in the data directory. That file is necessary for the scripts to run.

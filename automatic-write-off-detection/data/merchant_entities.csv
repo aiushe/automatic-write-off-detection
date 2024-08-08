@@ -1,0 +1,81 @@
+merchant_name,category
+Amazon,Shops
+Walmart,Shops
+Starbucks,Food and Drink
+McDonald's,Food and Drink
+ExxonMobil,Gas Stations
+Shell,Gas Stations
+Netflix,Entertainment
+Spotify,Entertainment
+Apple,Technology
+Microsoft,Technology
+Target,Shops
+Costco,Shops
+Home Depot,Shops
+Lowe's,Shops
+Best Buy,Technology
+AT&T,Telecommunication Services
+Verizon,Telecommunication Services
+T-Mobile,Telecommunication Services
+Sprint,Telecommunication Services
+Chevron,Gas Stations
+BP,Gas Stations
+7-Eleven,Food and Drink
+Burger King,Food and Drink
+Subway,Food and Drink
+Chipotle,Food and Drink
+Dunkin' Donuts,Food and Drink
+Peet's Coffee,Food and Drink
+Nike,Shops
+Adidas,Shops
+Under Armour,Shops
+Reebok,Shops
+Zelle,Transfer
+PayPal,Transfer
+Venmo,Transfer
+Square,Transfer
+Stripe,Transfer
+Dropbox,Digital Purchase
+Google,Digital Purchase
+Adobe,Digital Purchase
+Slack,Digital Purchase
+Zoom,Digital Purchase
+Uber,Transportation
+Lyft,Transportation
+Delta Air Lines,Travel
+American Airlines,Travel
+United Airlines,Travel
+Southwest Airlines,Travel
+Hilton,Travel
+Marriott,Travel
+Holiday Inn,Travel
+Airbnb,Travel
+DoorDash,Food and Drink
+GrubHub,Food and Drink
+Uber Eats,Food and Drink
+Postmates,Food and Drink
+Whole Foods,Shops
+Trader Joe's,Shops
+Safeway,Shops
+Kroger,Shops
+Publix,Shops
+CVS,Pharmacy
+Walgreens,Pharmacy
+Rite Aid,Pharmacy
+Boeing,Technology
+Intel,Technology
+AMD,Technology
+NVIDIA,Technology
+Cisco,Technology
+Oracle,Technology
+Salesforce,Technology
+SAP,Technology
+IBM,Technology
+Accenture,Technology
+Infosys,Technology
+Tata Consultancy Services,Technology
+Capgemini,Technology
+Deloitte,Technology
+PwC,Technology
+EY,Technology
+KPMG,Technology

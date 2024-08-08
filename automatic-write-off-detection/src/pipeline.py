@@ -12,7 +12,7 @@ from utils import load_env_vars
 from logger import logger
 
 from categorization import categorize_transaction
-from merchant_identification import extract_entities, prioritize, identify_merchant
+from merchant_identification import extract_entities, prioritize, find_best_match
 
 openai_api_key = load_env_vars()
 openai.api_key = openai_api_key

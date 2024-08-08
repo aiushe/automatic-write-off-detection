@@ -1,4 +1,4 @@
-from merchant_identification import extract_entities, prioritize, identify_merchant
+from merchant_identification import extract_entities, prioritize, find_best_match
 from categorization import categorize_transaction
 import pandas as pd
 import joblib

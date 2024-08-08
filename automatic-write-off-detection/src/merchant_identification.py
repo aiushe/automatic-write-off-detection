@@ -1,13 +1,28 @@
 import re
 from fuzzywuzzy import fuzz, process
+import pandas as pd
+from rank_bm25 import BM25Okapi
 
+def load_merchant_entities(file_path):
+    """
+    Load merchant entities from a CSV file
+
+    :param file_path: path to CSV file
+    :return: dataFrame with merchant entities
+    """
+    return pd.read_csv(file_path)
+
+merchant_df = load_merchant_entities('../data/merchant_entities.csv')
+corpus = merchant_df['merchant_name'].tolist()
+tokenized_corpus = [doc.split(" ") for doc in corpus]
+bm25 = BM25Okapi(tokenized_corpus)
 
 def extract_entities(transaction):
     '''
     Extract entities from a transaction description using regular expressions
 
-    :param transaction: Transaction description
-    :return: Dictionary that contains the extracted entities
+    :param transaction: transaction description
+    :return: dictionary that contains the extracted entities
     '''
     pattern = {
         'transaction_type': r'(PURCHASE|DEBIT|POS|PRE-AUTHORIZATION|ATM WITHDRAWAL|TRANSFER)',
@@ -30,8 +45,8 @@ def prioritize(entities):
     '''
     Prioritize and return the most relevant information from the extracted entities
 
-    :param entities: Dictionary that contains the extracted entities
-    :return: Prioritized entity or 'UNKNOWN'
+    :param entities: dictionary that contains the extracted entities
+    :return: prioritized entity or 'UNKNOWN'
     '''
     if entities['merchant']:
         return entities['merchant']
@@ -41,20 +56,40 @@ def prioritize(entities):
         return 'UNKNOWN'
 
 
-def identify_merchant(transaction, sample):
-    '''
-    Identify the merchant from transaction description using fuzzy matching
+def bm25_search(query, corpus):
+    """
+    Perform BM25 search on the corpus
 
-    :param transaction: Transaction description
-    :param sample: List of sample merchants
-    :return: Identified merchant or 'UNKNOWN'
-    '''
+    :param query: query string
+    :param corpus: list of merchants
+    :return: document, score sorted by score
+    """
+    tokenized_corpus = [doc.split(" ") for doc in corpus]
+    bm25 = BM25Okapi(tokenized_corpus)
+    tokenized_query = query.split(" ")
+    scores = bm25.get_scores(tokenized_query)
+    return sorted(zip(corpus, scores), key=lambda x: x[1], reverse=True)
 
-    match = process.extractOne(transaction, sample, scorer=fuzz.token_sort_ratio)
-    if match:
-        return match[0]
+
+def find_best_match(query, merchant_df, threshold=75):
+    """
+    Find the best match for query using BM25 and fuzzy matching.
+
+    :param query: query string
+    :param merchant_df: dataFrame with merchant entities
+    :param threshold: fuzzy matching score
+    :return: best matching merchant name and category
+    """
+    corpus = merchant_df['merchant_name'].tolist()
+    bm25_results = bm25_search(query, corpus)
+    top_result = bm25_results[0][0]  # Get the top result from BM25
+    fuzzy_score = fuzz.token_sort_ratio(query, top_result)
+
+    if fuzzy_score >= threshold:
+        category = merchant_df[merchant_df['merchant_name'] == top_result]['category'].values[0]
+        return top_result, category
     else:
-        return 'UNKNOWN'
+        return 'UNKNOWN', 'UNKNOWN'
 
 if __name__ == "__main__":
     sample_t = [
@@ -70,9 +105,10 @@ if __name__ == "__main__":
 
     for t in sample_t:
         entities = extract_entities(t)
-        merchant = identify_merchant(t, sample_t)
+        merchant, category = find_best_match(t, sample_t)
 
         print(f"Transaction: {t}")
         print(f"Entities: {entities}")
         print(f"Merchant: {merchant}")
+        print(f"Category: {category}")
         print("-" * 40)
